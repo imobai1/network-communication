@@ -59,6 +59,7 @@ int main() {
 	// 6 ¹Ø±ÕÌ×½Ú×Öclosesocket
 	closesocket(serverSocket);
 	WSACleanup();
+
 	return 0;
 }
  
