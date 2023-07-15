@@ -9,8 +9,6 @@
 
 int main() {
 	char buffer[1024] = {};
-	std::string request = "Hello, server!";
-	
 	//启动Windows socket 2.x环境
 	WORD ver = MAKEWORD(2, 2);
 	WSADATA dat;
@@ -37,15 +35,25 @@ int main() {
 	else {
 		printf("连接成功...\n");
 	}
-	// 4发送数据给服务器
-	send(clientSocket,request.c_str(),request.size(),0);
-	
-	// 5接收服务器信息recv
-	int bytesRead = recv(clientSocket,buffer, sizeof(buffer), 0);
-	if (bytesRead > 0) {
-		printf("接收到数据: %s \n", buffer);
+	while (true){
+		// 4 输入请求命令
+		char cmdRequest[1024] = {};
+		scanf("%s", cmdRequest);
+		// 5 处理请求命令 
+		if (0 == strcmp(cmdRequest, "exit")) {
+			break;
+		}
+		else{
+			// 6 想服务器发送命令
+			send(clientSocket, cmdRequest, sizeof(cmdRequest), 0);
+		}
+		// 7 接收服务器信息recv
+		int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+		if (bytesRead > 0) {
+			printf("接收到数据: %s \n", buffer);
+		}
 	}
-	// 4关闭套节字closesocket
+	// 8 关闭套节字closesocket
 	closesocket(clientSocket);
 	WSACleanup();
 	getchar();

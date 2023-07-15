@@ -10,7 +10,7 @@
 int main() {
 	
 	char buffer[1024] = {};
-	char response[] = "Hello,I'am server!";
+	
 	//启动Windows socket 2.x环境
 	WORD ver = MAKEWORD(2, 2);
 	WSADATA dat;
@@ -42,21 +42,40 @@ int main() {
 	struct sockaddr_in clientAddr;
 	int clientAddressLenth = sizeof(clientAddr); 
 	SOCKET clientSocket = INVALID_SOCKET;
-	while (true) {
-		clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr,&clientAddressLenth);
-		if (INVALID_SOCKET == clientSocket) {
-			printf("错误, 接受到无效客户端SOCKET . . . \n");
-		}
-		printf("新客户端加入：IP = %s \n",inet_ntoa(clientAddr.sin_addr));
-		// 6 接收客户端发送的数据
-		int bytesRead = recv(clientSocket,buffer,sizeof(buffer),0);
-		if (bytesRead > 0) {
-			printf("接收到数据: %s \n", buffer);
-		}
-		// 7 send向客户端发送一条数据
-		send(clientSocket, response, sizeof(response),0);
+	clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddressLenth);
+	if (INVALID_SOCKET == clientSocket) {
+		printf("错误, 接受到无效客户端SOCKET . . . \n");
 	}
-	// 6 关闭套节字closesocket
+	printf("新客户端加入：IP = %s \n", inet_ntoa(clientAddr.sin_addr));
+	// 6 接收客户端发送的数据
+	while (true) {
+		// 7 接收客户端的请求命令
+		int cmdrequestlen = recv(clientSocket, buffer, sizeof(buffer), 0);
+		if (cmdrequestlen <= 0) {
+			printf("客户端已退出，任务结束\n");
+			break;
+		}
+		// 8 处理请求
+		if (0 == strcmp(buffer, "getName")) {
+			printf("接收到请求数据: %s \n", buffer);
+			// 9 send向客户端发送一条数据
+			char response[] = "qiang ge";
+			send(clientSocket, response, sizeof(response), 0);
+		}
+		else if (0 == strcmp(buffer, "getAge")) {
+			printf("接收到请求数据: %s \n", buffer);
+			// 9 send向客户端发送一条数据
+			char response[] = "80";
+			send(clientSocket, response, sizeof(response), 0);
+		}
+		else {
+			printf("接收到请求数据: %s \n", buffer);
+			// 9 send向客户端发送一条数据
+			char response[] = "???";
+			send(clientSocket, response, sizeof(response), 0);
+		}
+	}
+	// 10 关闭套节字closesocket
 	closesocket(serverSocket);
 	WSACleanup();
 
