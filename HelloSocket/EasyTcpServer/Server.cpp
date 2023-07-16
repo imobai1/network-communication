@@ -3,8 +3,9 @@
 #include <windows.h>
 #include <WinSock2.h>
 #include <iostream>
-
+#include "DataPackage.h"
 #pragma comment(lib,"ws2_32.lib")
+
 
 
 int main() {
@@ -37,7 +38,6 @@ int main() {
 	else {
 		printf("监听网络端口成功...\n");
 	}
-	
 	// 5 accept等待接受客户端连接
 	struct sockaddr_in clientAddr;
 	int clientAddressLenth = sizeof(clientAddr); 
@@ -50,35 +50,44 @@ int main() {
 	// 6 接收客户端发送的数据
 	while (true) {
 		// 7 接收客户端的请求命令
-		int cmdrequestlen = recv(clientSocket, buffer, sizeof(buffer), 0);
-		if (cmdrequestlen <= 0) {
-			printf("客户端已退出，任务结束\n");
+		DataHeader header = {};
+		int cLength = recv(clientSocket, (char*)&header, sizeof(DataHeader), 0);
+		if (cLength <= 0) {
+			std::cout << "客户端已退出，任务结束";
 			break;
 		}
-		// 8 处理请求
-		if (0 == strcmp(buffer, "getName")) {
-			printf("接收到请求数据: %s \n", buffer);
-			// 9 send向客户端发送一条数据
-			char response[] = "qiang ge";
-			send(clientSocket, response, sizeof(response), 0);
-		}
-		else if (0 == strcmp(buffer, "getAge")) {
-			printf("接收到请求数据: %s \n", buffer);
-			// 9 send向客户端发送一条数据
-			char response[] = "80";
-			send(clientSocket, response, sizeof(response), 0);
-		}
-		else {
-			printf("接收到请求数据: %s \n", buffer);
-			// 9 send向客户端发送一条数据
-			char response[] = "???";
-			send(clientSocket, response, sizeof(response), 0);
+		printf("收到命令：%d 数据长度：%d\n", header.cmd, header.dataLength);
+		switch (header.cmd) {
+			case CMD_LOGIN: {
+				Login login = {};
+				recv(clientSocket, (char*)&login, sizeof(Login), 0);
+				//忽略判断用户密码是否正确的过程
+				LoginResult res = {1};
+				send(clientSocket, (char*)&header, sizeof(DataHeader), 0);
+				send(clientSocket, (char*)&res, sizeof(LoginResult), 0);
+				break;
+			}
+			case CMD_LOGOUT: {
+				Logout logout = {};
+				recv(clientSocket, (char*)&logout, sizeof(Logout), 0);
+				//忽略判断用户密码是否正确的过程
+				LogoutResult res = {1};
+				send(clientSocket, (char*)&header, sizeof(DataHeader), 0);
+				send(clientSocket, (char*)&res, sizeof(LogoutResult), 0);
+				break;
+			}
+			default:
+				header.cmd = CMD_ERROR;
+				header.dataLength = 0;
+				send(clientSocket, (char*)&header, sizeof(header), 0);
+				break;
 		}
 	}
 	// 10 关闭套节字closesocket
 	closesocket(serverSocket);
 	WSACleanup();
-
+	std::cout << "已退出";
+	getchar();
 	return 0;
 }
  

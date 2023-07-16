@@ -4,7 +4,9 @@
 #include <WinSock2.h>
 #include <stdio.h>
 #include <iostream>
+#include "DataPackage.h"
 #pragma comment(lib,"ws2_32.lib")
+
 
 
 int main() {
@@ -43,19 +45,41 @@ int main() {
 		if (0 == strcmp(cmdRequest, "exit")) {
 			break;
 		}
-		else{
-			// 6 想服务器发送命令
-			send(clientSocket, cmdRequest, sizeof(cmdRequest), 0);
+		else if (0 == strcmp(cmdRequest, "login")) {
+			Login login = { "lyd","lydmm" };
+			DataHeader dh = {sizeof(login),CMD_LOGIN };
+			//5 向服务器发送请求命令
+			send(clientSocket, (const char*)&dh, sizeof(dh), 0);
+			send(clientSocket, (const char*)&login, sizeof(login), 0);
+			// 接收服务器返回的数据
+			DataHeader retHeader = {};
+			LoginResult res = {};
+			recv(clientSocket, (char*)&retHeader, sizeof(DataHeader), 0);
+			recv(clientSocket, (char*)&res, sizeof(LoginResult), 0);
+			printf("LoginResult: %d \n", res.result);
 		}
-		// 7 接收服务器信息recv
-		int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-		if (bytesRead > 0) {
-			printf("接收到数据: %s \n", buffer);
+		else if (0 == strcmp(cmdRequest, "logout")) {
+			Logout logout = { "lyd" };
+			DataHeader dh = { sizeof(logout), CMD_LOGOUT };
+			//5 向服务器发送请求命令
+			send(clientSocket, (const char*)&dh, sizeof(DataHeader), 0);
+			send(clientSocket, (const char*)&logout, sizeof(Logout), 0);
+			// 接收服务器返回的数据
+			DataHeader retHeader = {};
+			LogoutResult logoutRet = {};
+			recv(clientSocket, (char*)&retHeader, sizeof(DataHeader), 0);
+			recv(clientSocket, (char*)&logoutRet, sizeof(LogoutResult), 0);
+			printf("LogoutResult: %d \n", logoutRet.result);
+		}
+		else {
+			printf("不支持的命令，请重新输入。\n");
 		}
 	}
 	// 8 关闭套节字closesocket
 	closesocket(clientSocket);
+	//清除Windows socket环境
 	WSACleanup();
+	printf("已退出。");
 	getchar();
 	return 0;
 }
