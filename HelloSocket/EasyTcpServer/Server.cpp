@@ -56,23 +56,22 @@ int main() {
 			std::cout << "客户端已退出，任务结束";
 			break;
 		}
-		printf("收到命令：%d 数据长度：%d\n", header.cmd, header.dataLength);
 		switch (header.cmd) {
 			case CMD_LOGIN: {
 				Login login = {};
-				recv(clientSocket, (char*)&login, sizeof(Login), 0);
+				recv(clientSocket, (char*)&login + sizeof(DataHeader) , sizeof(Login) - sizeof(DataHeader), 0);
+				printf("收到命令:CMD_LOGIN ,数据长度：%d, 用户名：%s,用户密码：%s\n",login.dataLength,login.userName,login.passWord);
 				//忽略判断用户密码是否正确的过程
-				LoginResult res = {1};
-				send(clientSocket, (char*)&header, sizeof(DataHeader), 0);
+				LoginResult res;
 				send(clientSocket, (char*)&res, sizeof(LoginResult), 0);
 				break;
 			}
 			case CMD_LOGOUT: {
 				Logout logout = {};
-				recv(clientSocket, (char*)&logout, sizeof(Logout), 0);
+				recv(clientSocket, (char*)&logout + sizeof(DataHeader), sizeof(Logout) - sizeof(DataHeader), 0);
+				printf("收到命令:CMD_LOGOUT ,数据长度：%d, 用户名：%s\n", logout.dataLength, logout.userName);
 				//忽略判断用户密码是否正确的过程
-				LogoutResult res = {1};
-				send(clientSocket, (char*)&header, sizeof(DataHeader), 0);
+				LogoutResult res;
 				send(clientSocket, (char*)&res, sizeof(LogoutResult), 0);
 				break;
 			}

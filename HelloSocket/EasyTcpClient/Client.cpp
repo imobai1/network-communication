@@ -46,28 +46,23 @@ int main() {
 			break;
 		}
 		else if (0 == strcmp(cmdRequest, "login")) {
-			Login login = { "lyd","lydmm" };
-			DataHeader dh = {sizeof(login),CMD_LOGIN };
-			//5 向服务器发送请求命令
-			send(clientSocket, (const char*)&dh, sizeof(dh), 0);
+			// 5 向服务器发送请求命令
+			Login login;
+			strcpy(login.userName, "lyd");
+			strcpy(login.passWord, "lydmima");
 			send(clientSocket, (const char*)&login, sizeof(login), 0);
-			// 接收服务器返回的数据
-			DataHeader retHeader = {};
+			// 6 接收服务器返回的数据 
 			LoginResult res = {};
-			recv(clientSocket, (char*)&retHeader, sizeof(DataHeader), 0);
 			recv(clientSocket, (char*)&res, sizeof(LoginResult), 0);
 			printf("LoginResult: %d \n", res.result);
 		}
 		else if (0 == strcmp(cmdRequest, "logout")) {
-			Logout logout = { "lyd" };
-			DataHeader dh = { sizeof(logout), CMD_LOGOUT };
 			//5 向服务器发送请求命令
-			send(clientSocket, (const char*)&dh, sizeof(DataHeader), 0);
+			Logout logout ;
+			strcpy(logout.userName, "lyd");
 			send(clientSocket, (const char*)&logout, sizeof(Logout), 0);
 			// 接收服务器返回的数据
-			DataHeader retHeader = {};
 			LogoutResult logoutRet = {};
-			recv(clientSocket, (char*)&retHeader, sizeof(DataHeader), 0);
 			recv(clientSocket, (char*)&logoutRet, sizeof(LogoutResult), 0);
 			printf("LogoutResult: %d \n", logoutRet.result);
 		}
