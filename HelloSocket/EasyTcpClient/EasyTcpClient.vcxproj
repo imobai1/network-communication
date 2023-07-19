@@ -144,9 +144,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="EasyTcpClient.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DataPackage.h" />
+    <ClInclude Include="EasyTcpClient.h" />
+    <ClInclude Include="MessageHeader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
