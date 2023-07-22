@@ -1,6 +1,8 @@
 #include "EasyTcpClient.h"
+#include <thread>
 
-void cmdThread(EasyTcpClient* client)
+bool g_bRun = true;
+void cmdThread()
 {
 	while (true)
 	{
@@ -8,22 +10,9 @@ void cmdThread(EasyTcpClient* client)
 		scanf("%s", cmdBuf);
 		if (0 == strcmp(cmdBuf, "exit"))
 		{
-			client->Close();
+			g_bRun = false;
 			printf("退出cmdThread线程\n");
 			break;
-		}
-		else if (0 == strcmp(cmdBuf, "login"))
-		{
-			Login login;
-			strcpy(login.userName, "lyd");
-			strcpy(login.passWord, "lydmm");
-			client->SendData(&login);
-		}
-		else if (0 == strcmp(cmdBuf, "logout"))
-		{
-			Logout logout;
-			strcpy(logout.userName, "lyd");
-			client->SendData(&logout);
 		}
 		else {
 			printf("不支持的命令。\n");
@@ -32,17 +21,40 @@ void cmdThread(EasyTcpClient* client)
 }
 
 
+
 int main() {
-	EasyTcpClient client;
-	client.Connect("127.0.0.1", 4567);
-	//启动线程
-	std::thread t1(cmdThread, &client);
-	t1.detach();
-	while (client.isRun()) {
-		client.OnRun();
-		//printf("空闲时间处理其它业务..\n");
+
+	const int cCount = FD_SETSIZE - 1;
+	EasyTcpClient* client[cCount];
+
+	for (int n = 0; n < cCount; n++)
+	{
+		client[n] = new EasyTcpClient();
 	}
-	client.Close();
+	for (int n = 0; n < cCount; n++)
+	{
+		client[n]->Connect("127.0.0.1", 4567);
+	}
+
+	//启动线程
+	std::thread t1(cmdThread);
+	t1.detach();
+
+	Login login;
+	strcpy(login.userName, "lyd");
+	strcpy(login.passWord, "lydmm");
+
+	while (g_bRun) {
+		for (int n = 0; n < cCount; n++)
+		{
+			client[n]->OnRun();
+			client[n]->SendData(&login);
+		}
+	}
+	for (int n = 0; n < cCount; n++)
+	{
+		client[n]->Close();
+	}
 	printf("已退出。");
 	getchar();
 	return 0;
