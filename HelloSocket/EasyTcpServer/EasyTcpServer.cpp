@@ -19,11 +19,10 @@
 
 #include "EasyTcpServer.h"
 
-
-
 EasyTcpServer::EasyTcpServer()
 {
 	serverSocket = INVALID_SOCKET;
+	_recvCount = 0;
 }
 
 EasyTcpServer::~EasyTcpServer()
@@ -241,23 +240,29 @@ int EasyTcpServer::RecvData(ClientSocket* pClient)
 
 void EasyTcpServer::OnNetMsg(SOCKET clientSocket, DataHeader* header)
 {
+	_recvCount++;
+	auto t1 = _tTime.getElapsedSecond();
+	if (t1 >= 1.0) {
+		printf("time<%lf>,socket<%d>,clients<%d>,recvCount<%d>\n", t1, serverSocket, _clients.size(), _recvCount);
+		_recvCount = 0;
+		_tTime.update();
+	}
+
 	switch (header->cmd) {
 		case CMD_LOGIN: {
 			Login* login = (Login*)header;
 			//printf("收到客户端<Socket=%d>请求：CMD_LOGIN,数据长度：%d,userName=%s PassWord=%s\n", clientSocket, login->dataLength, login->userName, login->passWord);
 			//忽略判断用户密码是否正确的过程;
-			LoginResult res;
-			//send(clientSocket, (char*)&res, sizeof(LoginResult), 0);
-			SendData(clientSocket, &res);
+			//LoginResult res;
+			//SendData(clientSocket, &res);
 			break;
 		}
 		case CMD_LOGOUT: {
 			Logout* logout = (Logout*)header;
 			//printf("收到客户端<Socket=%d>请求：CMD_LOGOUT,数据长度：%d,userName=%s\n", clientSocket, logout->dataLength, logout->userName);
 			//忽略判断用户密码是否正确的过程
-			LoginResult res;
-			//send(clientSocket, (char*)&res, sizeof(LoginResult), 0);
-			SendData(clientSocket, &res);
+			//LoginResult res;
+			//SendData(clientSocket, &res);
 			break;
 		}
 		default:{

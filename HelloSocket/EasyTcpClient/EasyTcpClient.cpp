@@ -20,7 +20,6 @@
 #include "EasyTcpClient.h"
 
 
-
 EasyTcpClient::EasyTcpClient(){
 	clientSocket = INVALID_SOCKET;
 }
@@ -46,7 +45,7 @@ void EasyTcpClient::InitSocket(){
 		printf("错误，建立socket失败...\n");
 	}
 	else {
-		printf("建立socket成功...\n");
+		//printf("建立socket成功...\n");
 	}
 }
 
@@ -59,14 +58,14 @@ int EasyTcpClient::Connect(const char* ip, unsigned short port){
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(port);
 	serverAddress.sin_addr.s_addr = inet_addr(ip);
-	printf("<socket=%d>正在连接服务器<%s:%d>...\n", clientSocket, ip, port);
+	//printf("<socket=%d>正在连接服务器<%s:%d>...\n", clientSocket, ip, port);
 	// 连接服务器 connect
 	int ret = connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(struct sockaddr_in));
 	if (SOCKET_ERROR == ret) {
 		printf("<socket=%d>错误，连接服务器<%s:%d>失败...\n",clientSocket, ip, port);
 	}
 	else {
-		printf("<socket=%d>连接服务器<%s:%d>成功...\n", clientSocket, ip, port);
+		//printf("<socket=%d>连接服务器<%s:%d>成功...\n", clientSocket, ip, port);
 	}
 	return ret;
 }

@@ -25,7 +25,7 @@ class EasyTcpClient
 	SOCKET clientSocket;
 public:
 	EasyTcpClient();
-	~EasyTcpClient();
+	virtual ~EasyTcpClient();
 	//初始化socket
 	void InitSocket();
 	//连接服务器
